@@ -47,6 +47,8 @@ export const REASON_LABELS: Record<string, string> = {
   read: "썰 매수",
   review_refund: "리뷰 환급",
   sale_income: "판매 수익",
+  delist_refund: "상장폐지 환불",
+  delist_clawback: "상장폐지 수익 회수",
 };
 
 export interface Profile {

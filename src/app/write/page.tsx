@@ -30,8 +30,14 @@ export default function WritePage() {
     });
   }, [router]);
 
+  // 공백 제외 글자수 (DB 제약과 동일 기준)
+  const charCount = content.replace(/\s/g, "").length;
+  const MIN_CHARS = 300;
+  const longEnough = charCount >= MIN_CHARS;
+
   async function submit() {
-    if (!userId || !title.trim() || !category || !content.trim()) return;
+    if (!userId || !title.trim() || !category || !content.trim() || !longEnough)
+      return;
     setSubmitting(true);
     setError(null);
 
@@ -45,7 +51,12 @@ export default function WritePage() {
     });
 
     if (error) {
-      setError("상장에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      // 23514: check 제약 위반 (분량 미달 등)
+      setError(
+        error.code === "23514"
+          ? "상장 심사 기준 미달이에요. 공백 제외 300자 이상으로 썰을 더 풀어주세요 📉"
+          : "상장에 실패했어요. 잠시 후 다시 시도해 주세요."
+      );
       setSubmitting(false);
     } else {
       setDone(true);
@@ -81,7 +92,7 @@ export default function WritePage() {
     );
   }
 
-  const valid = title.trim() && category && content.trim();
+  const valid = title.trim() && category && content.trim() && longEnough;
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5">
@@ -133,6 +144,18 @@ export default function WritePage() {
           placeholder="여기에 썰을 풀어주세요. 앞 150자는 미리보기로 공개돼요."
           className="w-full resize-none rounded-xl bg-card p-4 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-muted/60 focus:ring-2 focus:ring-primary"
         />
+        <div className="mt-1.5 flex items-center justify-between">
+          <span className="text-xs text-ink-muted">
+            너무 짧은 썰은 상장 심사에서 탈락해요 📉
+          </span>
+          <span
+            className={`text-xs font-bold tabular-nums ${
+              longEnough ? "text-primary" : "text-ink-muted"
+            }`}
+          >
+            공백 제외 {charCount.toLocaleString("ko-KR")}자 / 최소 {MIN_CHARS}자
+          </span>
+        </div>
       </div>
 
       {error && <p className="text-sm text-rise">{error}</p>}

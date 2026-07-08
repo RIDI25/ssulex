@@ -14,6 +14,7 @@ import { baselinePrice, changeRate, type PricePoint } from "@/lib/price";
 import Toast from "@/components/Toast";
 import PriceChart from "@/components/PriceChart";
 import ChangeBadge from "@/components/ChangeBadge";
+import DelistButton from "@/components/DelistButton";
 
 const CATEGORY_STYLE: Record<string, string> = {
   fun: "bg-[#efe8ff] text-[#6c3ce9]",
@@ -245,6 +246,32 @@ export default function SsulDetailPage() {
     setSubmittingReview(false);
   }
 
+  async function share() {
+    if (!ssul) return;
+    const url = `${window.location.origin}/ssul/${id}`;
+    const price = formatPoints(ssul.current_price);
+    const text =
+      userId === ssul.author_id
+        ? `📈 내 썰 지금 ${price}! 시세 확인하러 가기`
+        : `이 썰 지금 ${price}래`;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile && navigator.share) {
+      try {
+        await navigator.share({ title: ssul.title, text, url });
+      } catch {
+        // 사용자가 공유창을 닫은 경우 — 무시
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        showToast("링크가 복사되었어요");
+      } catch {
+        showToast("복사에 실패했어요. 주소창의 링크를 이용해 주세요.");
+      }
+    }
+  }
+
   if (loading) {
     return (
       <div className="py-24 text-center text-sm text-ink-muted">
@@ -282,6 +309,21 @@ export default function SsulDetailPage() {
         <span className="text-xs text-ink-muted">
           {authorNick} · {timeAgo(ssul.created_at)}
         </span>
+        <button
+          onClick={share}
+          aria-label="공유하기"
+          className="ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-card text-ink"
+        >
+          <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
+            <path
+              d="M12 3v12m0-12L8 7m4-4 4 4M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
       <h1 className="mt-2 text-xl font-extrabold leading-snug text-ink">
@@ -383,6 +425,13 @@ export default function SsulDetailPage() {
           </ul>
         )}
       </section>
+
+      {/* 작성자 전용: 상장폐지 */}
+      {isAuthor && (
+        <div className="mt-10 flex justify-center pb-2">
+          <DelistButton ssulId={id} />
+        </div>
+      )}
 
       <Toast message={toast} />
     </div>

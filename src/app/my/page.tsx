@@ -10,6 +10,7 @@ import { formatPoints } from "@/lib/format";
 import { showGlobalToast } from "@/lib/toast";
 import SsulCard from "@/components/SsulCard";
 import Toast from "@/components/Toast";
+import DelistButton from "@/components/DelistButton";
 
 type Tab = "bought" | "listed";
 
@@ -266,9 +267,14 @@ export default function MyPage() {
           </p>
         ) : (
           listed.map(({ ssul, rate }) => (
-            <Link key={ssul.id} href={`/ssul/${ssul.id}`}>
-              <SsulCard ssul={ssul} rate={rate} />
-            </Link>
+            <div key={ssul.id}>
+              <Link href={`/ssul/${ssul.id}`}>
+                <SsulCard ssul={ssul} rate={rate} />
+              </Link>
+              <div className="mt-1.5 flex justify-end pr-1">
+                <DelistButton ssulId={ssul.id} />
+              </div>
+            </div>
           ))
         )}
       </div>
