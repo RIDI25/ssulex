@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import BottomTab from "@/components/BottomTab";
@@ -6,6 +6,18 @@ import BottomTab from "@/components/BottomTab";
 export const metadata: Metadata = {
   title: "SSULEX 썰거래소",
   description: "이야기를 주식처럼 거래하는 썰 거래소",
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "썰거래소",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#6C3CE9",
 };
 
 export default function RootLayout({

@@ -1,9 +1,9 @@
 export const CATEGORIES = [
   "fun",
   "scary",
-  "surprise",
   "angry",
-  "amazing",
+  "love",
+  "healing",
   "info",
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
@@ -11,9 +11,9 @@ export type Category = (typeof CATEGORIES)[number];
 export const CATEGORY_LABELS: Record<Category, string> = {
   fun: "재밌썰",
   scary: "무섭썰",
-  surprise: "놀람썰",
   angry: "화남썰",
-  amazing: "신기썰",
+  love: "연애썰",
+  healing: "치유썰",
   info: "정보썰",
 };
 
@@ -25,6 +25,7 @@ export interface Ssul {
   body: string;
   preview: string;
   current_price: number;
+  prev_ssul_id: string | null; // 시리즈 이전 편
   created_at: string;
 }
 

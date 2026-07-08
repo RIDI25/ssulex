@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import {
   CATEGORY_LABELS,
@@ -19,9 +20,9 @@ import DelistButton from "@/components/DelistButton";
 const CATEGORY_STYLE: Record<string, string> = {
   fun: "bg-[#efe8ff] text-[#6c3ce9]",
   scary: "bg-[#e5e0f0] text-[#45325f]",
-  surprise: "bg-[#f5f0ff] text-[#8f66f2]",
   angry: "bg-[#eae1fb] text-[#5527c9]",
-  amazing: "bg-[#ece9fb] text-[#7568d6]",
+  love: "bg-[#f6edfd] text-[#a05ce0]",
+  healing: "bg-[#f0eefa] text-[#8a7fc2]",
   info: "bg-[#eeecf6] text-[#6f66a8]",
 };
 
@@ -75,6 +76,15 @@ export default function SsulDetailPage() {
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
   const [history, setHistory] = useState<PricePoint[]>([]);
 
+  // 시리즈 이전/다음 편
+  interface SeriesLink {
+    id: string;
+    title: string;
+    current_price: number;
+  }
+  const [prevSsul, setPrevSsul] = useState<SeriesLink | null>(null);
+  const [nextSsul, setNextSsul] = useState<SeriesLink | null>(null);
+
   const [buying, setBuying] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -125,6 +135,14 @@ export default function SsulDetailPage() {
   }, [id]);
 
   const load = useCallback(async () => {
+    // 시리즈 링크로 상세 → 상세 이동 시 이전 썰 상태가 남지 않게 초기화
+    setLoading(true);
+    setNotFound(false);
+    setBody(null);
+    setPurchased(false);
+    setPrevSsul(null);
+    setNextSsul(null);
+
     const supabase = createClient();
 
     const [{ data: userRes }, { data: pub }] = await Promise.all([
@@ -158,7 +176,26 @@ export default function SsulDetailPage() {
         .then(({ data }) => setAuthorNick(data?.nickname ?? "익명")),
       loadReviews(),
       loadHistory(),
+      // 다음 편: prev_ssul_id가 이 썰인 썰 (미매수여도 노출)
+      supabase
+        .from("ssuls_public")
+        .select("id, title, current_price")
+        .eq("prev_ssul_id", id)
+        .maybeSingle()
+        .then(({ data }) => setNextSsul(data)),
     ];
+
+    // 이전 편 (미매수여도 노출)
+    if (pub.prev_ssul_id) {
+      tasks.push(
+        supabase
+          .from("ssuls_public")
+          .select("id, title, current_price")
+          .eq("id", pub.prev_ssul_id)
+          .maybeSingle()
+          .then(({ data }) => setPrevSsul(data))
+      );
+    }
 
     if (uid) {
       tasks.push(
@@ -306,6 +343,11 @@ export default function SsulDetailPage() {
         >
           {CATEGORY_LABELS[ssul.category] ?? ssul.category}
         </span>
+        {(prevSsul || nextSsul) && (
+          <span className="rounded-md border border-primary/40 px-1.5 py-0.5 text-[10px] font-bold text-primary">
+            시리즈
+          </span>
+        )}
         <span className="text-xs text-ink-muted">
           {authorNick} · {timeAgo(ssul.created_at)}
         </span>
@@ -343,6 +385,21 @@ export default function SsulDetailPage() {
       {/* 시세 차트 */}
       <PriceChart history={history} currentPrice={ssul.current_price} />
 
+      {/* 이전 편 (미매수 상태에서도 노출) */}
+      {prevSsul && (
+        <Link
+          href={`/ssul/${prevSsul.id}`}
+          className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-4 py-3"
+        >
+          <span className="shrink-0 text-xs font-bold text-ink-muted">
+            ◀ 이전 편
+          </span>
+          <span className="truncate text-sm font-semibold text-ink">
+            {prevSsul.title}
+          </span>
+        </Link>
+      )}
+
       {/* 본문 / 잠금 */}
       {unlocked ? (
         <div className="mt-5 whitespace-pre-wrap rounded-2xl bg-card p-4 text-[15px] leading-relaxed text-ink">
@@ -365,6 +422,24 @@ export default function SsulDetailPage() {
               : `${formatPoints(ssul.current_price)}로 매수하기`}
           </button>
         </div>
+      )}
+
+      {/* 다음 편 (미매수 상태에서도 노출 — 매수 유도) */}
+      {nextSsul && (
+        <Link
+          href={`/ssul/${nextSsul.id}`}
+          className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-primary/25 bg-[#f5f0ff] px-4 py-3.5"
+        >
+          <div className="flex min-w-0 flex-col">
+            <span className="text-xs font-bold text-primary">다음 편</span>
+            <span className="truncate text-sm font-bold text-ink">
+              {nextSsul.title}
+            </span>
+          </div>
+          <span className="shrink-0 rounded-full bg-primary px-3.5 py-2 text-[13px] font-bold text-white tabular-nums">
+            다음 편 {formatPoints(nextSsul.current_price)} ▶
+          </span>
+        </Link>
       )}
 
       {/* 리뷰 환급 배너 + 작성 폼 */}

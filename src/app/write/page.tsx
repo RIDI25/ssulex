@@ -18,6 +18,14 @@ export default function WritePage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  // 시리즈 연결 (선택사항)
+  const [seriesOn, setSeriesOn] = useState(false);
+  const [candidates, setCandidates] = useState<
+    { id: string; title: string }[]
+  >([]);
+  const [candidatesLoaded, setCandidatesLoaded] = useState(false);
+  const [prevId, setPrevId] = useState<string>("");
+
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -30,6 +38,35 @@ export default function WritePage() {
     });
   }, [router]);
 
+  // 시리즈 토글 시 "아직 다음 편이 없는 내 썰" 목록 로드
+  useEffect(() => {
+    if (!seriesOn || !userId || candidatesLoaded) return;
+    (async () => {
+      const supabase = createClient();
+      const { data: mine } = await supabase
+        .from("ssuls_public")
+        .select("id, title")
+        .eq("author_id", userId)
+        .order("created_at", { ascending: false });
+      const myList = (mine ?? []) as { id: string; title: string }[];
+      if (myList.length === 0) {
+        setCandidates([]);
+        setCandidatesLoaded(true);
+        return;
+      }
+      const { data: taken } = await supabase
+        .from("ssuls_public")
+        .select("prev_ssul_id")
+        .in(
+          "prev_ssul_id",
+          myList.map((s) => s.id)
+        );
+      const takenSet = new Set((taken ?? []).map((t) => t.prev_ssul_id));
+      setCandidates(myList.filter((s) => !takenSet.has(s.id)));
+      setCandidatesLoaded(true);
+    })();
+  }, [seriesOn, userId, candidatesLoaded]);
+
   // 공백 제외 글자수 (DB 제약과 동일 기준)
   const charCount = content.replace(/\s/g, "").length;
   const MIN_CHARS = 300;
@@ -41,6 +78,10 @@ export default function WritePage() {
     setSubmitting(true);
     setError(null);
 
+    const linkedPrev = seriesOn && prevId
+      ? candidates.find((c) => String(c.id) === prevId)?.id ?? null
+      : null;
+
     const supabase = createClient();
     const { error } = await supabase.from("ssuls").insert({
       author_id: userId,
@@ -48,6 +89,7 @@ export default function WritePage() {
       category,
       body: content.trim(),
       preview: content.trim().slice(0, 150),
+      prev_ssul_id: linkedPrev,
     });
 
     if (error) {
@@ -92,7 +134,12 @@ export default function WritePage() {
     );
   }
 
-  const valid = title.trim() && category && content.trim() && longEnough;
+  const valid =
+    title.trim() &&
+    category &&
+    content.trim() &&
+    longEnough &&
+    (!seriesOn || prevId);
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5">
@@ -131,6 +178,57 @@ export default function WritePage() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between">
+          <label className="text-[13px] font-semibold text-ink-muted">
+            시리즈로 연결 (선택)
+          </label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={seriesOn}
+            onClick={() => {
+              setSeriesOn(!seriesOn);
+              if (seriesOn) setPrevId("");
+            }}
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              seriesOn ? "bg-primary" : "bg-card"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                seriesOn ? "left-[22px]" : "left-0.5"
+              }`}
+            />
+          </button>
+        </div>
+        {seriesOn && (
+          <div className="mt-2">
+            {!candidatesLoaded ? (
+              <p className="text-sm text-ink-muted">불러오는 중…</p>
+            ) : candidates.length === 0 ? (
+              <p className="rounded-xl bg-card px-4 py-3 text-sm text-ink-muted">
+                연결할 수 있는 썰이 없어요. 이미 다음 편이 있거나 상장한 썰이
+                없는 경우예요.
+              </p>
+            ) : (
+              <select
+                value={prevId}
+                onChange={(e) => setPrevId(e.target.value)}
+                className="h-12 w-full rounded-xl bg-card px-3.5 text-sm text-ink outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">이전 편이 될 썰을 선택하세요</option>
+                {candidates.map((c) => (
+                  <option key={c.id} value={String(c.id)}>
+                    {c.title}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        )}
       </div>
 
       <div>

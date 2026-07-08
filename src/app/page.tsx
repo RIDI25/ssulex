@@ -20,6 +20,7 @@ import { formatPoints } from "@/lib/format";
 import SsulCard from "@/components/SsulCard";
 import ChangeBadge from "@/components/ChangeBadge";
 import Sparkline from "@/components/Sparkline";
+import InstallBanner from "@/components/InstallBanner";
 
 const FILTERS = ["all", ...CATEGORIES] as const;
 type Filter = (typeof FILTERS)[number];
@@ -250,6 +251,7 @@ export default function HomePage() {
     <Suspense>
       <WelcomeBanner />
       <SsulList />
+      <InstallBanner />
     </Suspense>
   );
 }

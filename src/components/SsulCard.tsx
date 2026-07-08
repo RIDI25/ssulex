@@ -7,9 +7,9 @@ import Sparkline from "@/components/Sparkline";
 const CATEGORY_STYLE: Record<string, string> = {
   fun: "bg-[#efe8ff] text-[#6c3ce9]",
   scary: "bg-[#e5e0f0] text-[#45325f]",
-  surprise: "bg-[#f5f0ff] text-[#8f66f2]",
   angry: "bg-[#eae1fb] text-[#5527c9]",
-  amazing: "bg-[#ece9fb] text-[#7568d6]",
+  love: "bg-[#f6edfd] text-[#a05ce0]",
+  healing: "bg-[#f0eefa] text-[#8a7fc2]",
   info: "bg-[#eeecf6] text-[#6f66a8]",
 };
 
