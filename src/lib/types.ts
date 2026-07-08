@@ -9,12 +9,12 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number];
 
 export const CATEGORY_LABELS: Record<Category, string> = {
-  fun: "재밌썰",
-  scary: "무섭썰",
-  angry: "화남썰",
-  love: "연애썰",
-  healing: "치유썰",
-  info: "정보썰",
+  fun: "재미",
+  scary: "무섭",
+  angry: "화남",
+  love: "연애",
+  healing: "힐링",
+  info: "정보",
 };
 
 export interface Ssul {
