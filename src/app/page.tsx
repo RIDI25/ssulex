@@ -80,18 +80,20 @@ function SsulList() {
 
   return (
     <>
-      <div className="sticky top-14 z-10 flex gap-2 border-b border-card bg-background px-4 py-3">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
-              filter === f ? "bg-ink text-white" : "bg-card text-ink-muted"
-            }`}
-          >
-            {FILTER_LABELS[f]}
-          </button>
-        ))}
+      <div className="sticky top-14 z-10 border-b border-card bg-background">
+        <div className="flex gap-2 overflow-x-auto px-4 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-semibold transition-colors ${
+                filter === f ? "bg-ink text-white" : "bg-card text-ink-muted"
+              }`}
+            >
+              {FILTER_LABELS[f]}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="flex flex-col gap-3 px-4 py-4">

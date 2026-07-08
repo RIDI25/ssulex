@@ -1,10 +1,14 @@
 import { CATEGORY_LABELS, type Ssul } from "@/lib/types";
 import { formatPoints, timeAgo } from "@/lib/format";
 
+// 보라 계열 안에서 명도/채도 톤으로만 구분
 const CATEGORY_STYLE: Record<string, string> = {
-  fun: "bg-[#fff1e8] text-[#e8590c]",
-  scary: "bg-[#efe9ff] text-primary",
-  info: "bg-[#e7f1ff] text-fall",
+  fun: "bg-[#efe8ff] text-[#6c3ce9]",
+  scary: "bg-[#e5e0f0] text-[#45325f]",
+  surprise: "bg-[#f5f0ff] text-[#8f66f2]",
+  angry: "bg-[#eae1fb] text-[#5527c9]",
+  amazing: "bg-[#ece9fb] text-[#7568d6]",
+  info: "bg-[#eeecf6] text-[#6f66a8]",
 };
 
 export default function SsulCard({ ssul }: { ssul: Ssul }) {

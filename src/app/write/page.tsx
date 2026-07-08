@@ -104,7 +104,7 @@ export default function WritePage() {
         <label className="mb-1.5 block text-[13px] font-semibold text-ink-muted">
           카테고리
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
               key={c}

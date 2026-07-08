@@ -1,9 +1,19 @@
-export const CATEGORIES = ["fun", "scary", "info"] as const;
+export const CATEGORIES = [
+  "fun",
+  "scary",
+  "surprise",
+  "angry",
+  "amazing",
+  "info",
+] as const;
 export type Category = (typeof CATEGORIES)[number];
 
 export const CATEGORY_LABELS: Record<Category, string> = {
   fun: "재밌썰",
   scary: "무섭썰",
+  surprise: "놀람썰",
+  angry: "화남썰",
+  amazing: "신기썰",
   info: "정보썰",
 };
 
