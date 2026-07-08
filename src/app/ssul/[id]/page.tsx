@@ -71,6 +71,7 @@ export default function SsulDetailPage() {
   const [body, setBody] = useState<string | null>(null);
   const [authorNick, setAuthorNick] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [purchased, setPurchased] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [nicknames, setNicknames] = useState<Record<string, string>>({});
@@ -86,6 +87,8 @@ export default function SsulDetailPage() {
   const [nextSsul, setNextSsul] = useState<SeriesLink | null>(null);
 
   const [buying, setBuying] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reporting, setReporting] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -205,7 +208,13 @@ export default function SsulDetailPage() {
           .eq("ssul_id", id)
           .eq("buyer_id", uid)
           .maybeSingle()
-          .then(({ data }) => setPurchased(!!data))
+          .then(({ data }) => setPurchased(!!data)),
+        supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", uid)
+          .maybeSingle()
+          .then(({ data }) => setIsAdmin(data?.is_admin === true))
       );
     }
 
@@ -283,6 +292,29 @@ export default function SsulDetailPage() {
     setSubmittingReview(false);
   }
 
+  async function submitReport() {
+    if (!userId) return;
+    setReporting(true);
+    const supabase = createClient();
+    const { error } = await supabase.from("reports").insert({
+      ssul_id: id,
+      reporter_id: userId,
+    });
+
+    if (error) {
+      // 23505: unique 제약 위반 = 1인 1신고 중복
+      showToast(
+        error.code === "23505"
+          ? "이미 신고한 썰이에요"
+          : "신고 접수에 실패했어요. 잠시 후 다시 시도해 주세요."
+      );
+    } else {
+      showToast("신고가 접수되었어요");
+    }
+    setReporting(false);
+    setReportOpen(false);
+  }
+
   async function share() {
     if (!ssul) return;
     const url = `${window.location.origin}/ssul/${id}`;
@@ -352,9 +384,17 @@ export default function SsulDetailPage() {
           {authorNick} · {timeAgo(ssul.created_at)}
         </span>
         <button
+          onClick={() =>
+            userId ? setReportOpen(true) : router.push("/login")
+          }
+          className="ml-auto shrink-0 rounded-full bg-card px-2.5 py-1.5 text-[11px] font-semibold text-ink-muted"
+        >
+          🚨 신고
+        </button>
+        <button
           onClick={share}
           aria-label="공유하기"
-          className="ml-auto flex h-8 w-8 items-center justify-center rounded-full bg-card text-ink"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-card text-ink"
         >
           <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4">
             <path
@@ -505,6 +545,44 @@ export default function SsulDetailPage() {
       {isAuthor && (
         <div className="mt-10 flex justify-center pb-2">
           <DelistButton ssulId={id} />
+        </div>
+      )}
+
+      {/* 관리자 전용: 강제 상장폐지 */}
+      {isAdmin && (
+        <div className="mt-6 flex justify-center pb-2">
+          <DelistButton ssulId={id} admin />
+        </div>
+      )}
+
+      {/* 신고 확인 모달 */}
+      {reportOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center px-6">
+          <div
+            className="absolute inset-0 bg-ink/40"
+            onClick={() => !reporting && setReportOpen(false)}
+          />
+          <div className="relative w-full max-w-[360px] rounded-2xl bg-background p-5">
+            <p className="text-base font-extrabold text-ink">
+              이 썰을 상업성 콘텐츠로 신고할까요?
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setReportOpen(false)}
+                disabled={reporting}
+                className="h-11 flex-1 rounded-xl bg-card text-sm font-bold text-ink disabled:opacity-60"
+              >
+                취소
+              </button>
+              <button
+                onClick={submitReport}
+                disabled={reporting}
+                className="h-11 flex-1 rounded-xl bg-rise text-sm font-bold text-white disabled:opacity-60"
+              >
+                {reporting ? "접수 중…" : "신고하기"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

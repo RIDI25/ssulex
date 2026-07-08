@@ -130,6 +130,10 @@ export default function WritePage() {
         >
           거래소로 가기
         </Link>
+        <p className="mt-4 text-xs leading-relaxed text-ink-muted">
+          광고·홍보 목적의 상업용 썰은 사전 경고 없이 상장폐지될 수 있으며,
+          판매 수익은 회수됩니다.
+        </p>
       </div>
     );
   }
@@ -258,10 +262,15 @@ export default function WritePage() {
 
       {error && <p className="text-sm text-rise">{error}</p>}
 
+      <p className="text-xs leading-relaxed text-ink-muted">
+        광고·홍보 목적의 상업용 썰은 사전 경고 없이 상장폐지될 수 있으며, 판매
+        수익은 회수됩니다.
+      </p>
+
       <button
         onClick={submit}
         disabled={!valid || submitting}
-        className="h-13 rounded-xl bg-primary text-[15px] font-bold text-white disabled:opacity-40"
+        className="-mt-2 h-13 rounded-xl bg-primary text-[15px] font-bold text-white disabled:opacity-40"
       >
         {submitting ? "상장 처리 중…" : "시작가 100P로 상장하기"}
       </button>

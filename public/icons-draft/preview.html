@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSULEX 아이콘 시안 비교</title>
+<style>
+  body {
+    margin: 0;
+    padding: 40px 24px 80px;
+    background: #f4f2f9;
+    font-family: -apple-system, "Apple SD Gothic Neo", sans-serif;
+    color: #1e1533;
+  }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  .hint { font-size: 13px; color: #8b849c; margin: 0 0 32px; }
+  .row {
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-end;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .label { width: 100%; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .slot { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .slot span { font-size: 12px; color: #8b849c; }
+  img { display: block; }
+  .dock {
+    display: flex; gap: 10px; align-items: center;
+    background: #e9e6f2; border-radius: 14px; padding: 10px 14px;
+  }
+</style>
+</head>
+<body>
+  <h1>SSULEX 앱 아이콘 시안</h1>
+  <p class="hint">판단 기준: 32px(브라우저 탭/즐겨찾기)에서도 형태가 읽히는가</p>
+
+  <div class="row">
+    <div class="label">버전 1 — 작은 화살촉 (가독성 우선)</div>
+    <div class="slot"><img src="./icon-1.svg" width="512" height="512"><span>512px</span></div>
+    <div class="slot"><img src="./icon-1.svg" width="180" height="180"><span>180px (홈 화면)</span></div>
+    <div class="slot"><img src="./icon-1.svg" width="32" height="32"><span>32px (탭)</span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">버전 2 — 큰 화살촉 (심볼성 우선)</div>
+    <div class="slot"><img src="./icon-2.svg" width="512" height="512"><span>512px</span></div>
+    <div class="slot"><img src="./icon-2.svg" width="180" height="180"><span>180px (홈 화면)</span></div>
+    <div class="slot"><img src="./icon-2.svg" width="32" height="32"><span>32px (탭)</span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">버전 3 — 화살촉 없음 (미니멀)</div>
+    <div class="slot"><img src="./icon-3.svg" width="512" height="512"><span>512px</span></div>
+    <div class="slot"><img src="./icon-3.svg" width="180" height="180"><span>180px (홈 화면)</span></div>
+    <div class="slot"><img src="./icon-3.svg" width="32" height="32"><span>32px (탭)</span></div>
+  </div>
+
+  <div class="row">
+    <div class="label">32px 나란히 비교</div>
+    <div class="dock">
+      <img src="./icon-1.svg" width="32" height="32">
+      <img src="./icon-2.svg" width="32" height="32">
+      <img src="./icon-3.svg" width="32" height="32">
+    </div>
+  </div>
+</body>
+</html>

@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { showGlobalToast } from "@/lib/toast";
 
-export default function DelistButton({ ssulId }: { ssulId: string }) {
+export default function DelistButton({
+  ssulId,
+  admin = false,
+  onDone,
+}: {
+  ssulId: string;
+  admin?: boolean;
+  onDone?: () => void; // 성공 시 기본 동작(메인 이동) 대신 실행
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [working, setWorking] = useState(false);
@@ -13,9 +21,10 @@ export default function DelistButton({ ssulId }: { ssulId: string }) {
   async function delist() {
     setWorking(true);
     const supabase = createClient();
-    const { data, error } = await supabase.rpc("delist_ssul", {
-      p_ssul_id: ssulId,
-    });
+    const { data, error } = await supabase.rpc(
+      admin ? "admin_delist_ssul" : "delist_ssul",
+      { p_ssul_id: ssulId }
+    );
 
     if (error || data?.ok === false) {
       showGlobalToast(
@@ -26,18 +35,33 @@ export default function DelistButton({ ssulId }: { ssulId: string }) {
       return;
     }
 
-    router.push("/");
     showGlobalToast("상장폐지가 완료되었어요");
+    if (onDone) {
+      setWorking(false);
+      setOpen(false);
+      onDone();
+    } else {
+      router.push("/");
+    }
   }
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="text-xs text-ink-muted underline underline-offset-2"
-      >
-        상장폐지
-      </button>
+      {admin ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-xl border border-rise px-3.5 py-2 text-xs font-bold text-rise"
+        >
+          🛡 관리자: 강제 상장폐지
+        </button>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="text-xs text-ink-muted underline underline-offset-2"
+        >
+          상장폐지
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-40 flex items-center justify-center px-6">
@@ -47,11 +71,12 @@ export default function DelistButton({ ssulId }: { ssulId: string }) {
           />
           <div className="relative w-full max-w-[360px] rounded-2xl bg-background p-5">
             <p className="text-base font-extrabold text-ink">
-              이 썰을 상장폐지할까요?
+              {admin ? "이 썰을 강제 상장폐지할까요?" : "이 썰을 상장폐지할까요?"}
             </p>
             <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-              매수자 전원에게 전액 환불되며, 이 썰의 판매 수익은 회수돼요.
-              리뷰와 시세 기록도 모두 사라지고 복구할 수 없어요.
+              {admin
+                ? "매수자 전원에게 환불되며 작성자의 판매 수익은 회수돼요."
+                : "매수자 전원에게 전액 환불되며, 이 썰의 판매 수익은 회수돼요. 리뷰와 시세 기록도 모두 사라지고 복구할 수 없어요."}
             </p>
             <div className="mt-5 flex gap-2">
               <button
@@ -66,7 +91,7 @@ export default function DelistButton({ ssulId }: { ssulId: string }) {
                 disabled={working}
                 className="h-11 flex-1 rounded-xl bg-rise text-sm font-bold text-white disabled:opacity-60"
               >
-                {working ? "처리 중…" : "상장폐지"}
+                {working ? "처리 중…" : admin ? "강제 상장폐지" : "상장폐지"}
               </button>
             </div>
           </div>

@@ -14,6 +14,7 @@ export default function Header() {
   const router = useRouter();
   const [points, setPoints] = useState<number | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [toast, setToast] = useState<string | null>(null);
@@ -29,10 +30,13 @@ export default function Header() {
     const supabase = createClient();
     const { data } = await supabase
       .from("profiles")
-      .select("points")
+      .select("points, is_admin")
       .eq("id", uid)
       .single();
-    if (data) setPoints(data.points);
+    if (data) {
+      setPoints(data.points);
+      setIsAdmin(data.is_admin === true);
+    }
   }, []);
 
   useEffect(() => {
@@ -54,6 +58,7 @@ export default function Header() {
       } else {
         setUserId(null);
         setPoints(null);
+        setIsAdmin(false);
       }
     });
 
@@ -178,6 +183,15 @@ export default function Header() {
                     >
                       내 지갑
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setMenuOpen(false)}
+                        className="rounded-xl px-3 py-3.5 text-[15px] font-semibold text-ink hover:bg-card"
+                      >
+                        관리자
+                      </Link>
+                    )}
                     <button
                       onClick={signOut}
                       className="rounded-xl px-3 py-3.5 text-left text-[15px] font-semibold text-ink-muted hover:bg-card"

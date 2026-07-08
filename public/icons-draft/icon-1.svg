@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="115" fill="#6C3CE9"/>
+  <!-- ㅅ1 = 상승 (빨강), 작은 화살촉 위로 -->
+  <g stroke="#F04452" stroke-width="38" fill="none" stroke-linecap="round">
+    <path d="M124 96 L72 228"/>
+    <path d="M124 96 L176 228"/>
+  </g>
+  <polygon points="124,54 100,90 148,90" fill="#F04452"/>
+  <!-- ㅅ2 = 하락 (파랑), 작은 화살촉 아래로 -->
+  <g stroke="#4D8DFF" stroke-width="38" fill="none" stroke-linecap="round">
+    <path d="M252 92 L200 228"/>
+    <path d="M252 92 L304 224"/>
+  </g>
+  <polygon points="304,268 280,232 328,232" fill="#4D8DFF"/>
+  <!-- ㅓ, ㄹ (흰색) -->
+  <g stroke="#FFFFFF" stroke-width="38" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M364 158 L420 158"/>
+    <path d="M420 80 L420 236"/>
+    <path d="M84 296 L414 296 L414 366 L96 366 L96 436 L424 436"/>
+  </g>
+</svg>
