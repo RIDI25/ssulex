@@ -1,5 +1,7 @@
-import { CATEGORY_LABELS, type Ssul } from "@/lib/types";
+import { CATEGORY_LABELS, type SsulPublic } from "@/lib/types";
 import { formatPoints, timeAgo } from "@/lib/format";
+import ChangeBadge from "@/components/ChangeBadge";
+import Sparkline from "@/components/Sparkline";
 
 // 보라 계열 안에서 명도/채도 톤으로만 구분
 const CATEGORY_STYLE: Record<string, string> = {
@@ -11,7 +13,15 @@ const CATEGORY_STYLE: Record<string, string> = {
   info: "bg-[#eeecf6] text-[#6f66a8]",
 };
 
-export default function SsulCard({ ssul }: { ssul: Ssul }) {
+export default function SsulCard({
+  ssul,
+  rate,
+  spark,
+}: {
+  ssul: SsulPublic;
+  rate?: number;
+  spark?: number[];
+}) {
   return (
     <article className="rounded-2xl bg-card p-4">
       <div className="flex items-center gap-2">
@@ -35,11 +45,15 @@ export default function SsulCard({ ssul }: { ssul: Ssul }) {
         </p>
       )}
 
-      <div className="mt-3 flex items-baseline justify-between">
+      <div className="mt-3 flex items-center justify-between">
         <span className="text-xs font-medium text-ink-muted">현재 시세</span>
-        <span className="text-base font-extrabold tabular-nums text-ink">
-          {formatPoints(ssul.current_price)}
-        </span>
+        <div className="flex items-center gap-2">
+          {spark && <Sparkline values={spark} />}
+          <span className="text-base font-extrabold tabular-nums text-ink">
+            {formatPoints(ssul.current_price)}
+          </span>
+          {rate !== undefined && <ChangeBadge rate={rate} />}
+        </div>
       </div>
     </article>
   );
