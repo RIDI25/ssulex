@@ -8,6 +8,7 @@ import {
   type PricePoint,
 } from "@/lib/price";
 import { CATEGORY_LABELS } from "@/lib/types";
+import { OG_LOGO } from "./og-logo";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -28,6 +29,7 @@ function loadFont() {
   fontPromise ??= fetch(FONT_URL).then((r) => r.arrayBuffer());
   return fontPromise;
 }
+
 
 function formatPoints(points: number): string {
   return `${points.toLocaleString("ko-KR")}P`;
@@ -68,6 +70,7 @@ export default async function OgImage({
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
+  const logoSrc = OG_LOGO;
   const [fontData, { data: ssul }] = await Promise.all([
     loadFont(),
     supabase.from("ssuls_public").select("*").eq("id", id).maybeSingle(),
@@ -93,7 +96,17 @@ export default async function OgImage({
             fontFamily: "Pretendard",
           }}
         >
-          <div style={{ display: "flex", fontSize: 72, color: PURPLE }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoSrc}
+            width={96}
+            height={96}
+            alt=""
+            style={{ borderRadius: 24 }}
+          />
+          <div
+            style={{ display: "flex", fontSize: 72, color: PURPLE, marginTop: 20 }}
+          >
             SSULEX
           </div>
           <div style={{ display: "flex", fontSize: 32, color: INK, marginTop: 12 }}>
@@ -142,7 +155,15 @@ export default async function OgImage({
         }}
       >
         {/* 로고 */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={logoSrc}
+            width={52}
+            height={52}
+            alt=""
+            style={{ borderRadius: 13 }}
+          />
           <span style={{ fontSize: 40, color: PURPLE }}>SSULEX</span>
           <span style={{ fontSize: 26, color: INK }}>썰거래소</span>
         </div>
