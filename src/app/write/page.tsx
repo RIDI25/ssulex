@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { CATEGORIES, CATEGORY_LABELS, type Category } from "@/lib/types";
+import { generatePenName } from "@/lib/penName";
 
 export default function WritePage() {
   const router = useRouter();
@@ -18,13 +19,17 @@ export default function WritePage() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  // 작성자 필명 (직접 입력 불가, 🎲로 다시 뽑기만)
+  const [penName, setPenName] = useState(() => generatePenName());
+
   // 시리즈 연결 (선택사항)
   const [seriesOn, setSeriesOn] = useState(false);
   const [candidates, setCandidates] = useState<
-    { id: string; title: string }[]
+    { id: string; title: string; pen_name: string | null }[]
   >([]);
   const [candidatesLoaded, setCandidatesLoaded] = useState(false);
   const [prevId, setPrevId] = useState<string>("");
+  const [samePenName, setSamePenName] = useState(true); // 이전 편과 같은 필명
 
   useEffect(() => {
     const supabase = createClient();
@@ -45,10 +50,14 @@ export default function WritePage() {
       const supabase = createClient();
       const { data: mine } = await supabase
         .from("ssuls_public")
-        .select("id, title")
+        .select("id, title, pen_name")
         .eq("author_id", userId)
         .order("created_at", { ascending: false });
-      const myList = (mine ?? []) as { id: string; title: string }[];
+      const myList = (mine ?? []) as {
+        id: string;
+        title: string;
+        pen_name: string | null;
+      }[];
       if (myList.length === 0) {
         setCandidates([]);
         setCandidatesLoaded(true);
@@ -78,9 +87,14 @@ export default function WritePage() {
     setSubmitting(true);
     setError(null);
 
-    const linkedPrev = seriesOn && prevId
-      ? candidates.find((c) => String(c.id) === prevId)?.id ?? null
+    const prevSsul = seriesOn && prevId
+      ? candidates.find((c) => String(c.id) === prevId) ?? null
       : null;
+    // 시리즈 연재 + 체크 시 이전 편 필명 승계 (없으면 이번 필명)
+    const effectivePenName =
+      prevSsul && samePenName && prevSsul.pen_name
+        ? prevSsul.pen_name
+        : penName;
 
     const supabase = createClient();
     const { error } = await supabase.from("ssuls").insert({
@@ -89,7 +103,8 @@ export default function WritePage() {
       category,
       body: content.trim(),
       preview: content.trim().slice(0, 150),
-      prev_ssul_id: linkedPrev,
+      prev_ssul_id: prevSsul?.id ?? null,
+      pen_name: effectivePenName,
     });
 
     if (error) {
@@ -145,6 +160,13 @@ export default function WritePage() {
     longEnough &&
     (!seriesOn || prevId);
 
+  const selectedPrev =
+    seriesOn && prevId
+      ? candidates.find((c) => String(c.id) === prevId)
+      : undefined;
+  const inheriting = !!(selectedPrev && samePenName && selectedPrev.pen_name);
+  const displayPenName = inheriting ? selectedPrev!.pen_name! : penName;
+
   return (
     <div className="flex flex-col gap-5 px-4 py-5">
       <h1 className="text-lg font-extrabold text-ink">썰 상장하기</h1>
@@ -185,6 +207,32 @@ export default function WritePage() {
       </div>
 
       <div>
+        <label className="mb-1.5 block text-[13px] font-semibold text-ink-muted">
+          작성자명 (이 글에만 쓰이는 필명)
+        </label>
+        <div className="flex items-center gap-2">
+          <div className="flex h-12 min-w-0 flex-1 items-center rounded-xl bg-card px-4 text-[15px] font-semibold text-ink">
+            {displayPenName}
+          </div>
+          {!inheriting && (
+            <button
+              type="button"
+              onClick={() => setPenName(generatePenName())}
+              aria-label="필명 다시 뽑기"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-card text-xl"
+            >
+              🎲
+            </button>
+          )}
+        </div>
+        {inheriting && (
+          <p className="mt-1 text-xs text-ink-muted">
+            이전 편의 필명을 그대로 사용해요.
+          </p>
+        )}
+      </div>
+
+      <div>
         <div className="flex items-center justify-between">
           <label className="text-[13px] font-semibold text-ink-muted">
             시리즈로 연결 (선택)
@@ -218,18 +266,31 @@ export default function WritePage() {
                 없는 경우예요.
               </p>
             ) : (
-              <select
-                value={prevId}
-                onChange={(e) => setPrevId(e.target.value)}
-                className="h-12 w-full rounded-xl bg-card px-3.5 text-sm text-ink outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">이전 편이 될 썰을 선택하세요</option>
-                {candidates.map((c) => (
-                  <option key={c.id} value={String(c.id)}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
+              <>
+                <select
+                  value={prevId}
+                  onChange={(e) => setPrevId(e.target.value)}
+                  className="h-12 w-full rounded-xl bg-card px-3.5 text-sm text-ink outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">이전 편이 될 썰을 선택하세요</option>
+                  {candidates.map((c) => (
+                    <option key={c.id} value={String(c.id)}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+                {prevId && (
+                  <label className="mt-2 flex items-center gap-2 text-sm text-ink">
+                    <input
+                      type="checkbox"
+                      checked={samePenName}
+                      onChange={(e) => setSamePenName(e.target.checked)}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    이전 편과 같은 필명 사용
+                  </label>
+                )}
+              </>
             )}
           </div>
         )}

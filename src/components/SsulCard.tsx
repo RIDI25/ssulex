@@ -32,7 +32,9 @@ export default function SsulCard({
         >
           {CATEGORY_LABELS[ssul.category] ?? ssul.category}
         </span>
-        <span className="text-xs text-ink-muted">{timeAgo(ssul.created_at)}</span>
+        <span className="truncate text-xs text-ink-muted">
+          {ssul.pen_name ?? "익명"} · {timeAgo(ssul.created_at)}
+        </span>
       </div>
 
       <h2 className="mt-2 line-clamp-2 text-[15px] font-bold leading-snug text-ink">

@@ -150,7 +150,12 @@ export default function MyPage() {
       .eq("id", userId);
 
     if (error) {
-      showToast("닉네임 변경에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      // P0001: 트리거 raise exception (예약어 등), 23514: check 제약 위반
+      showToast(
+        error.code === "P0001" || error.code === "23514"
+          ? "사용할 수 없는 닉네임이에요"
+          : "닉네임 변경에 실패했어요. 잠시 후 다시 시도해 주세요."
+      );
     } else {
       setNickname(next);
       showToast("닉네임이 변경됐어요.");

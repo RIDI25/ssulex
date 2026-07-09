@@ -69,7 +69,6 @@ export default function SsulDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [ssul, setSsul] = useState<SsulPublic | null>(null);
   const [body, setBody] = useState<string | null>(null);
-  const [authorNick, setAuthorNick] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [purchased, setPurchased] = useState(false);
@@ -171,12 +170,6 @@ export default function SsulDetailPage() {
         .eq("id", id)
         .maybeSingle()
         .then(({ data }) => setBody(data?.body ?? null)),
-      supabase
-        .from("profiles")
-        .select("nickname")
-        .eq("id", pub.author_id)
-        .maybeSingle()
-        .then(({ data }) => setAuthorNick(data?.nickname ?? "익명")),
       loadReviews(),
       loadHistory(),
       // 다음 편: prev_ssul_id가 이 썰인 썰 (미매수여도 노출)
@@ -381,7 +374,7 @@ export default function SsulDetailPage() {
           </span>
         )}
         <span className="text-xs text-ink-muted">
-          {authorNick} · {timeAgo(ssul.created_at)}
+          {ssul.pen_name ?? "익명"} · {timeAgo(ssul.created_at)}
         </span>
         <button
           onClick={() =>

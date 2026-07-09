@@ -26,6 +26,7 @@ export interface Ssul {
   preview: string;
   current_price: number;
   prev_ssul_id: string | null; // 시리즈 이전 편
+  pen_name: string | null; // 글별 필명 (계정 닉네임과 무관)
   created_at: string;
 }
 
